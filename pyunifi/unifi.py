@@ -38,10 +38,10 @@ class UniFiClient(object):
                 'url': '/stat/device/',
                 'ext': 'mac'
             },
-            'radius-add': {
+            'radius_acct': {
                 'url': '/rest/account'
             },
-            'radius-list': {
+            'radius_accts': {
                 'url': '/rest/account'
             }
         },
@@ -219,9 +219,9 @@ class UniFiClient(object):
         return self._get_results('client', params={'mac': mac})
 
     def get_radius_accts(self):
-        return self._get_results('radius-list')
+        return self._get_results('radius_accts')
 
-    def add_radius_acct(self, name, password, tunnel_type, tunnel_medium_type, vlan=None):
+    def set_radius_acct(self, name, password, tunnel_type, tunnel_medium_type, vlan=None):
         tunnel_type = int(tunnel_type)
         tunnel_medium_type = int(tunnel_medium_type)
         if tunnel_type < 1 or tunnel_type > 13:
@@ -237,7 +237,13 @@ class UniFiClient(object):
         }
         if vlan:
             data['vlan'] = int(vlan)
-        return self._set_action('radius-add', data=data)
+        return self._set_action('radius_acct', data=data)
+
+    def get(self, which, **kwargs):
+        return self._get_results(which, **kwargs)
+
+    def set(self, which, **kwargs):
+        return self._set_action(which, **kwargs)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
