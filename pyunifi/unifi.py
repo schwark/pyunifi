@@ -40,6 +40,9 @@ class UniFiClient(object):
             },
             'radius-add': {
                 'url': '/rest/account'
+            },
+            'radius-list': {
+                'url': '/rest/account'
             }
         },
         'ubnt': {
@@ -214,6 +217,9 @@ class UniFiClient(object):
 
     def get_client(self, mac):
         return self._get_results('client', params={'mac': mac})
+
+    def get_radius_accts(self):
+        return self._get_results('radius-list')
 
     def add_radius_acct(self, name, password, tunnel_type, tunnel_medium_type, vlan=None):
         tunnel_type = int(tunnel_type)
