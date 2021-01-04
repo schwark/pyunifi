@@ -66,20 +66,18 @@ class UniFiClient(object):
         }
     }
 
-    def __init__(self, base, username=None, password=None, site='default', state=None, unifios=False):
+    def __init__(self, base, username=None, password=None, site='default', state=None, unifios=None):
         self.base = base
         self.site = site
         self.username = username
         self.password = password
-        self.cookies = RequestsCookieJar()
         self._set_type(unifios)
         self.session = True if state else False
-        self._check_unifios()
-        if state:
-            if 'session' in state:
-                self.cookies[self._get_step_metadata('cookie')] = state['session']
-            if 'csrf' in state:
-                self.cookies['csrf_token'] = state['csrf']
+        if None == unifios:
+            self._check_unifios()
+        else:
+            self._set_type(unifios=unifios)
+        self.cookies = requests.cookies.cookiejar_from_dict(json.loads(state)) if state else RequestsCookieJar()
 
     def _get_step_url(self, step, params=None):
         result = None
@@ -127,7 +125,7 @@ class UniFiClient(object):
                 request_params['data'] = data
         r = requests.request(**request_params)
         if(r.status_code >= 200 and r.status_code <= 400):
-            self.cookies.update(r.cookies)
+            self.cookies = r.cookies
         return r
 
     def _get_results(self, step, data=None, params=None):
@@ -161,7 +159,6 @@ class UniFiClient(object):
                 tries += 1
         return result
 
-
     def _check_unifios(self):
         r = self._make_request('check')
         if(r.status_code == 200):
@@ -184,10 +181,9 @@ class UniFiClient(object):
         return result
 
     def get_save_state(self):
-        result = {}
+        result = ''
         if self.cookies:
-            result['session'] = self.cookies[self._get_step_metadata('cookie')]
-            result['csrf'] = self.cookies['csrf_token']
+            result = json.dumps(dict(self.cookies))
         return result
 
     def login(self):
