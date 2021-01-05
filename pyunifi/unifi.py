@@ -125,7 +125,10 @@ class UniFiClient(object):
                 request_params['data'] = data
         r = requests.request(**request_params)
         if(r.status_code >= 200 and r.status_code <= 400):
-            self.cookies = r.cookies
+            for cookie in r.cookies:
+                if cookie.name in self.cookies:
+                    del self.cookies[cookie.name]
+                self.cookies.set_cookie(cookie)
         return r
 
     def _get_results(self, step, data=None, params=None):
